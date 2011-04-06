@@ -3,6 +3,8 @@ package com.cajhughes.ready;
 import java.math.BigDecimal;
 
 public class Result {
+    private static final String QUOTE = "\"";
+
     private int positiveQuantityPositivePrice = 0;
     private int positiveQuantityZeroPrice = 0;
     private int positiveQuantityNegativePrice = 0;
@@ -66,9 +68,9 @@ public class Result {
         int qty;
         BigDecimal money;
         try {
-            qty = getInt(quantity);
+            qty = getInt(removeQuotes(quantity));
             try {
-                money = getBigDecimal(price);
+                money = getBigDecimal(removeQuotes(price));
                 setResult(qty, money);
             }
             catch(NumberFormatException nfe) {
@@ -78,6 +80,19 @@ public class Result {
         catch(NumberFormatException nfe) {
             quantityNotNumber++;
         }
+    }
+
+    private String removeQuotes(final String value) {
+        String remove = null;
+        if (value != null) {
+            if(value.startsWith(QUOTE) && value.endsWith(QUOTE)) {
+                remove = value.substring(1, value.length()-1);
+            }
+            else {
+                remove = value;
+            }
+        }
+        return remove;
     }
 
     private void setResult(final int quantity, final BigDecimal price) {
