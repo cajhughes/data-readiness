@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 
-public class Frame extends JFrame {
+public class ReadyFrame extends JFrame {
     private static final String[] delimiters = new String[] {"", ",", "|"};
     private File file;
     private JTextField filename = new JTextField();
@@ -41,7 +41,7 @@ public class Frame extends JFrame {
     private JLabel priceLabel = new JLabel();
     private FileProcessor processor = null;
 
-    public Frame() {
+    public ReadyFrame() {
         try {
             jbInit();
         } catch (Exception e) {
@@ -123,6 +123,17 @@ public class Frame extends JFrame {
         this.getContentPane().add(filename, null);
     }
 
+    private void toggleControls(final boolean on) {
+        delimiter.setEnabled(on);
+        quantity.setEnabled(on);
+        price1.setEnabled(on);
+        price2.setEnabled(on);
+        price3.setEnabled(on);
+        browse.setEnabled(on);
+        start.setEnabled(on);
+        stop.setEnabled(!on);
+    }
+
     private void browse_actionPerformed(ActionEvent e) {
         JFileChooser fileDialog = new JFileChooser();
         int selection = fileDialog.showOpenDialog(this);
@@ -139,11 +150,8 @@ public class Frame extends JFrame {
         Options options = new Options(file, (String)delimiter.getSelectedItem(),
                                       (String)quantity.getSelectedItem(), (String)price1.getSelectedItem(),
                                       (String)price2.getSelectedItem(), (String)price3.getSelectedItem());
-        if(!options.valid()) {
-            JOptionPane.showMessageDialog(this, options.getValidationError(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        else {
-            processor = new FileProcessor(status, options, 3);
+        if(options.valid()) {
+            processor = new StatusFileProcessor(status, options, 3);
             processor.addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent event) {
                     if("state".equals(event.getPropertyName())) {
@@ -153,20 +161,23 @@ public class Frame extends JFrame {
                     }
                 }
             });
-            start.setEnabled(false);
-            stop.setEnabled(true);
+            toggleControls(false);
             processor.execute();
+        }
+        else {
+            JOptionPane.showMessageDialog(this, options.getValidationError(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void stop_actionPerformed(ActionEvent e) {
         if(processor != null) {
             processor.cancel(true);
-            start.setEnabled(true);
-            stop.setEnabled(false);
             processor = null;
         }
+        toggleControls(true);
+        browse.requestFocus();
     }
+
     private void writeResults() {
         try {
             File output = OutputUtils.getOutputFile(file);
@@ -174,6 +185,8 @@ public class Frame extends JFrame {
             FileUtils.writeStringToFile(
                 output, OutputUtils.toString(quantity.getSelectedItem(), prices, processor.get()));
             status.setText("Output written to " + output.getAbsolutePath());
+            toggleControls(true);
+            processor = null;
         }
         catch(CancellationException ce) {
             // null;
@@ -186,8 +199,8 @@ public class Frame extends JFrame {
     private void delimiter_itemStateChanged(ItemEvent e) {
         String value = (String)delimiter.getSelectedItem();
         if(value != null && !value.equals("")) {
-            Options options = new Options(file, value, (String)quantity.getSelectedItem(), (String)price1.getSelectedItem(), null, null);
-            FileProcessor processor = new FileProcessor(status, options, 3);
+            Options options = new Options(file, value);
+            FileProcessor processor = new FileProcessor(options, 3);
             try {
                 String[] columns = processor.getHeaderColumns();
                 if(columns != null && columns.length > 0) {

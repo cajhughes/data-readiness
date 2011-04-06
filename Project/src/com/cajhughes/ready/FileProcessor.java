@@ -1,9 +1,7 @@
 package com.cajhughes.ready;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.StringTokenizer;
-import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -11,19 +9,15 @@ import org.apache.commons.io.LineIterator;
 public class FileProcessor extends SwingWorker<Result[], Integer> {
     private Options options = null;
     private Result[] results = null;
-    private JTextField status;
     private int lineCounter;
     private int price1Index = -1;
     private int price2Index = -1;
     private int price3Index = -1;
-    private int priceCount = 0;
     private int quantityIndex;
 
-    public FileProcessor(final JTextField status, final Options options, final int priceCount) {
-        this.status = status;
+    public FileProcessor(final Options options, final int priceCount) {
         lineCounter = 0;
         this.options = options;
-        this.priceCount = priceCount;
         results = new Result[priceCount];
         for(int i=0; i<priceCount; i++) {
             results[i] = new Result();
@@ -50,12 +44,9 @@ public class FileProcessor extends SwingWorker<Result[], Integer> {
         finally {
             LineIterator.closeQuietly(iterator);
         }
-        return results;        
-    }
-
-    protected void process(List<Integer> lines) {
-        Integer last = lines.get(lines.size()-1);
-        status.setText("Processed " + last + " lines");
+        Result[] copy = new Result[results.length];
+        System.arraycopy(results, 0, copy, 0, results.length);
+        return copy;        
     }
 
     public String[] getHeaderColumns() throws IOException {
