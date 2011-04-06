@@ -11,11 +11,12 @@ public class OutputUtils {
     public static File getOutputFile(final File file) {
         File output = null;
         if(file != null) {
-            String filename = file.getAbsolutePath() + ".csv";
-            output = new File(filename);
+            StringBuilder buffer = new StringBuilder(file.getAbsolutePath());
+            buffer.append(".csv");
+            output = new File(buffer.toString());
             while(output.exists()) {
-                filename += ".csv";
-                output = new File(filename);
+                buffer.append(".csv");
+                output = new File(buffer.toString());
             }
         }
         return output;

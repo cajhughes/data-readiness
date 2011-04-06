@@ -30,6 +30,14 @@
         <include name="**/*.txt"/>
       </patternset>
     </unzip>
+    <patternset id="images">
+      <include name="**/*.gif"/>
+    </patternset>
+    <copy todir="${build.dir}">
+      <fileset dir="src">
+        <patternset refid="images"/>
+      </fileset>
+    </copy>
   </target>
   <target name="jar" description="Construct JAR file" depends="compile,copyJar">
     <mkdir dir="${dist.dir}"/>

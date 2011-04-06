@@ -11,6 +11,10 @@ public class Options {
     private String price3Column = null;
     private String validationError = null;
 
+    public Options(final File file, final String delimiter) {
+        this(file, delimiter, null, null, null, null);
+    }
+
     public Options(final File file, final String delimiter, final String quantity,
                    final String price1, final String price2, final String price3) {
         this.file = file;
