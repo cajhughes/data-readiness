@@ -1,6 +1,8 @@
 package com.cajhughes.ready.view;
 
-import com.cajhughes.ready.Options;
+import com.cajhughes.ready.controller.StatusAttributeProcessor;
+import com.cajhughes.ready.controller.StatusQuantityPriceProcessor;
+import com.cajhughes.ready.model.Options;
 import com.cajhughes.ready.processor.AttributeProcessor;
 import com.cajhughes.ready.processor.QuantityPriceProcessor;
 import com.cajhughes.ready.util.InputUtils;

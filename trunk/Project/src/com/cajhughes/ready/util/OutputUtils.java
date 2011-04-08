@@ -1,6 +1,6 @@
 package com.cajhughes.ready.util;
 
-import com.cajhughes.ready.QuantityPriceResult;
+import com.cajhughes.ready.model.QuantityPriceResult;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Map;

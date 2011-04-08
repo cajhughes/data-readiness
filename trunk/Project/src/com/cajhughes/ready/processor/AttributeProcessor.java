@@ -1,6 +1,6 @@
 package com.cajhughes.ready.processor;
 
-import com.cajhughes.ready.Options;
+import com.cajhughes.ready.model.Options;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;

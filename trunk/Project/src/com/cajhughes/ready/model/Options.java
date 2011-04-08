@@ -1,4 +1,4 @@
-package com.cajhughes.ready;
+package com.cajhughes.ready.model;
 
 import java.io.File;
 
