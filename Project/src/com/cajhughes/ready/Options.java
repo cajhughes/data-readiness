@@ -53,7 +53,27 @@ public class Options {
         return validationError;
     }
 
-    public boolean valid() {
+    public boolean isAttributeValid() {
+        boolean result = true;
+        if(file == null) {
+            result = false;
+            validationError = "Please specify the file to be processed";
+        }
+        else {
+            if(!file.exists()) {
+                validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
+            }
+            else {
+                if(delimiter == null || delimiter.equals("")) {
+                    result = false;
+                    validationError = "Please specify a Delimiter";
+                }
+            }
+        }
+        return result;
+    }
+
+    public boolean isReadyValid() {
         boolean result = true;
         if(file == null || !file.exists()) {
             result = false;
