@@ -1,7 +1,7 @@
 package com.cajhughes.ready.processor;
 
-import com.cajhughes.ready.Options;
-import com.cajhughes.ready.QuantityPriceResult;
+import com.cajhughes.ready.model.Options;
+import com.cajhughes.ready.model.QuantityPriceResult;
 import java.io.IOException;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;

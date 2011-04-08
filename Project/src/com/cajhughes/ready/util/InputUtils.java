@@ -1,6 +1,6 @@
 package com.cajhughes.ready.util;
 
-import com.cajhughes.ready.Options;
+import com.cajhughes.ready.model.Options;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;

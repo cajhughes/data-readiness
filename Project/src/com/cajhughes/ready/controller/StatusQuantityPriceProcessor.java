@@ -1,6 +1,6 @@
-package com.cajhughes.ready.view;
+package com.cajhughes.ready.controller;
 
-import com.cajhughes.ready.Options;
+import com.cajhughes.ready.model.Options;
 import com.cajhughes.ready.processor.QuantityPriceProcessor;
 import java.util.List;
 import javax.swing.JTextField;
