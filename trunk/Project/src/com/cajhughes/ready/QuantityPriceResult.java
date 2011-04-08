@@ -2,7 +2,7 @@ package com.cajhughes.ready;
 
 import java.math.BigDecimal;
 
-public class Result {
+public class QuantityPriceResult {
     private static final String QUOTE = "\"";
 
     private int positiveQuantityPositivePrice = 0;

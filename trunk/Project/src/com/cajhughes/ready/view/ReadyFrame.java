@@ -1,5 +1,10 @@
-package com.cajhughes.ready;
+package com.cajhughes.ready.view;
 
+import com.cajhughes.ready.Options;
+import com.cajhughes.ready.processor.AttributeProcessor;
+import com.cajhughes.ready.processor.QuantityPriceProcessor;
+import com.cajhughes.ready.util.InputUtils;
+import com.cajhughes.ready.util.OutputUtils;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -10,6 +15,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -34,12 +42,15 @@ public class ReadyFrame extends JFrame {
     private JComboBox price3 = new JComboBox();
     private JButton start = new JButton();
     private JButton stop = new JButton();
+    private JButton attributes = new JButton();
     private JTextField status = new JTextField();
     private JLabel filenameLabel = new JLabel();
     private JLabel delimiterLabel = new JLabel();
     private JLabel quantityLabel = new JLabel();
     private JLabel priceLabel = new JLabel();
-    private FileProcessor processor = null;
+    private AttributeProcessor attributeProcessor = null;
+    private QuantityPriceProcessor readyProcessor = null;
+    private Options options = null;
 
     public ReadyFrame() {
         try {
@@ -94,6 +105,14 @@ public class ReadyFrame extends JFrame {
                 stop_actionPerformed(e);
             }
         });
+        attributes.setText("Attributes");
+        attributes.setBounds(new Rectangle(400, 170, 100, 20));
+        attributes.setEnabled(false);
+        attributes.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                attributes_actionPerformed(e);
+            }
+        });
         status.setBounds(new Rectangle(1, 234, 512, 20));
         status.setText("Please select the file to be processed");
         status.setEnabled(false);
@@ -107,6 +126,7 @@ public class ReadyFrame extends JFrame {
         priceLabel.setBounds(new Rectangle(10, 113, 70, 14));
         price1.setBounds(new Rectangle(80, 110, 300, 20));
         price1.setEnabled(false);
+        this.getContentPane().add(attributes, null);
         this.getContentPane().add(stop, null);
         this.getContentPane().add(status, null);
         this.getContentPane().add(price3, null);
@@ -132,6 +152,7 @@ public class ReadyFrame extends JFrame {
         browse.setEnabled(on);
         start.setEnabled(on);
         stop.setEnabled(!on);
+        attributes.setEnabled(on);
     }
 
     private void browse_actionPerformed(ActionEvent e) {
@@ -147,22 +168,43 @@ public class ReadyFrame extends JFrame {
     }
 
     private void start_actionPerformed(ActionEvent e) {
-        Options options = new Options(file, (String)delimiter.getSelectedItem(),
-                                      (String)quantity.getSelectedItem(), (String)price1.getSelectedItem(),
-                                      (String)price2.getSelectedItem(), (String)price3.getSelectedItem());
-        if(options.valid()) {
-            processor = new StatusFileProcessor(status, options, 3);
-            processor.addPropertyChangeListener(new PropertyChangeListener() {
+        options = new Options(file, (String)delimiter.getSelectedItem(),
+                              (String)quantity.getSelectedItem(), (String)price1.getSelectedItem(),
+                              (String)price2.getSelectedItem(), (String)price3.getSelectedItem());
+        if(options.isReadyValid()) {
+            readyProcessor = new StatusQuantityPriceProcessor(status, options, 3);
+            readyProcessor.addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent event) {
                     if("state".equals(event.getPropertyName())) {
                         if(event.getNewValue().equals(SwingWorker.StateValue.DONE)) {
-                            writeResults();
+                            writeReadyResults();
                         }
                     }
                 }
             });
             toggleControls(false);
-            processor.execute();
+            readyProcessor.execute();
+        }
+        else {
+            JOptionPane.showMessageDialog(this, options.getValidationError(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void attributes_actionPerformed(ActionEvent e) {
+        options = new Options(file, (String)delimiter.getSelectedItem());
+        if(options.isAttributeValid()) {
+            attributeProcessor = new StatusAttributeProcessor(status, options);
+            attributeProcessor.addPropertyChangeListener(new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent event) {
+                    if("state".equals(event.getPropertyName())) {
+                        if(event.getNewValue().equals(SwingWorker.StateValue.DONE)) {
+                            writeAttributeResults(options);
+                        }
+                    }
+                }
+            });
+            toggleControls(false);
+            attributeProcessor.execute();
         }
         else {
             JOptionPane.showMessageDialog(this, options.getValidationError(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -170,26 +212,56 @@ public class ReadyFrame extends JFrame {
     }
 
     private void stop_actionPerformed(ActionEvent e) {
-        if(processor != null) {
-            processor.cancel(true);
-            processor = null;
+        if(readyProcessor != null) {
+            readyProcessor.cancel(true);
+            readyProcessor = null;
         }
         toggleControls(true);
         browse.requestFocus();
     }
 
-    private void writeResults() {
+    private void writeAttributeResults(final Options options) {
+        PrintStream stream = null;
         try {
-            File output = OutputUtils.getOutputFile(file);
-            Object[] prices = {price1.getSelectedItem(), price2.getSelectedItem(), price3.getSelectedItem()};
-            FileUtils.writeStringToFile(
-                output, OutputUtils.toString(quantity.getSelectedItem(), prices, processor.get()));
-            status.setText("Output written to " + output.getAbsolutePath());
+            if(!attributeProcessor.isCancelled()) {
+                File output = OutputUtils.getOutputFile(file);
+                Map<Integer, Set<String>> results = attributeProcessor.get();
+                stream = new PrintStream(output);
+                OutputUtils.write(stream, InputUtils.getHeaderColumnsOnly(options), results);
+                stream.flush();
+                stream.close();
+                status.setText("Output written to " + output.getAbsolutePath());
+            }
             toggleControls(true);
-            processor = null;
+            attributeProcessor = null;
         }
         catch(CancellationException ce) {
-            // null;
+            JOptionPane.showMessageDialog(this, "Operation Cancelled", "Cancelled", JOptionPane.INFORMATION_MESSAGE);
+        }
+        catch(Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);            
+        }
+        finally {
+            if(stream != null) {
+                stream.close();
+            }
+        }
+    }
+
+    private void writeReadyResults() {
+        try {
+            if(!readyProcessor.isCancelled()) {
+                File output = OutputUtils.getOutputFile(file);
+                Object[] prices = {price1.getSelectedItem(), price2.getSelectedItem(), price3.getSelectedItem()};
+                FileUtils.writeStringToFile(
+                    output, OutputUtils.toString(quantity.getSelectedItem(), prices, readyProcessor.get()));
+                status.setText("Output written to " + output.getAbsolutePath());
+            }
+            toggleControls(true);
+            readyProcessor = null;
+        }
+        catch(CancellationException ce) {
+            JOptionPane.showMessageDialog(this, "Operation Cancelled", "Cancelled", JOptionPane.INFORMATION_MESSAGE);
         }
         catch(Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);            
@@ -200,9 +272,8 @@ public class ReadyFrame extends JFrame {
         String value = (String)delimiter.getSelectedItem();
         if(value != null && !value.equals("")) {
             Options options = new Options(file, value);
-            FileProcessor processor = new FileProcessor(options, 3);
             try {
-                String[] columns = processor.getHeaderColumns();
+                String[] columns = InputUtils.getHeaderColumns(options);
                 if(columns != null && columns.length > 0) {
                     DefaultComboBoxModel quantityModel = new DefaultComboBoxModel(columns);
                     DefaultComboBoxModel price1Model = new DefaultComboBoxModel(columns);
@@ -217,6 +288,7 @@ public class ReadyFrame extends JFrame {
                     price2.setEnabled(true);
                     price3.setModel(price3Model);
                     price3.setEnabled(true);
+                    attributes.setEnabled(true);
                 }
             }
             catch(IOException ioe) {

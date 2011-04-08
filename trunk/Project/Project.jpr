@@ -57,6 +57,7 @@
       <hash n="runConfigurationDefinitions">
          <hash n="Default">
             <value n="custom" v="false"/>
+            <value n="javaOptions" v="-Xms1024m -Xmx1024m"/>
             <value n="name" v="Default"/>
             <hash n="oracle.jdeveloper.oracle.jdevimpl.profiler.settings.ProfilerConfiguration">
                <value n="timeCollectBlockedWait" v="true"/>
