@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -46,29 +45,25 @@ public class AttributeProcessor extends SwingWorker<Map<Integer, Set<String>>, I
     }
 
     private void processHeader(final String line) {
-        int count = 0;
         if(line != null) {
-            StringTokenizer tokenizer = new StringTokenizer(line, options.getDelimiter());
-            while(tokenizer.hasMoreTokens()) {
-                tokenizer.nextToken();
-                results.put(count, new HashSet<String>());
-                count++;
+            String[] tokens = line.split("\\" + options.getDelimiter());
+            int size = tokens.length;
+            for(int i=0; i<size; i++) {
+                results.put(i, new HashSet<String>());
             }
         }
     }
 
     private void processLine(final String line) {
-        int count = 0;
         if(line != null) {
-            StringTokenizer tokenizer = new StringTokenizer(line, options.getDelimiter());
-            while(tokenizer.hasMoreTokens()) {
-                String token = tokenizer.nextToken();
-                Set<String> set = results.get(count);
+            String[] tokens = line.split("\\" + options.getDelimiter());
+            int size = tokens.length;
+            for(int i=0; i<size; i++) {
+                Set<String> set = results.get(i);
                 if(set != null) {
-                    set.add(token);
+                    set.add(tokens[i]);
                 }
-                results.put(count, set);
-                count++;
+                results.put(i, set);
             }
         }
     }

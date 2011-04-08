@@ -8,18 +8,21 @@ import java.util.Set;
 
 public class OutputUtils {
     public static final String COMMA = ",";
+    public static final String CR = "\n";
+    public static final String EXTENSION = ".csv";
     public static final String NEGATIVE = "Negative";
     public static final String POSITIVE = "Positive";
+    public static final String QUOTE = "\"";
     public static final String ZERO = "Zero";
 
     public static File getOutputFile(final File file) {
         File output = null;
         if(file != null) {
             StringBuilder buffer = new StringBuilder(file.getAbsolutePath());
-            buffer.append(".csv");
+            buffer.append(EXTENSION);
             output = new File(buffer.toString());
             while(output.exists()) {
-                buffer.append(".csv");
+                buffer.append(EXTENSION);
                 output = new File(buffer.toString());
             }
         }
@@ -52,9 +55,9 @@ public class OutputUtils {
                 for(int i=0; i<mapCount; i++) {
                     Object[] columnArray = (Object[])resultsArray[i];
                     if(rowCount < columnArray.length) {
-                        buffer.append("\"");
+                        buffer.append(QUOTE);
                         buffer.append(columnArray[rowCount].toString());
-                        buffer.append("\"");
+                        buffer.append(QUOTE);
                     }
                     if(i<mapCount-1) {
                         buffer.append(COMMA);
@@ -77,7 +80,7 @@ public class OutputUtils {
                     buffer.append(price[i].toString().toUpperCase());
                     buffer.append(COMMA);
                     buffer.append(COMMA);
-                    buffer.append("\n");
+                    buffer.append(CR);
                     buffer.append(COMMA);
                     buffer.append(COMMA);
                     buffer.append(POSITIVE);
@@ -85,7 +88,7 @@ public class OutputUtils {
                     buffer.append(ZERO);
                     buffer.append(COMMA);
                     buffer.append(NEGATIVE);
-                    buffer.append("\n");
+                    buffer.append(CR);
                     buffer.append(quantity.toString().toUpperCase());
                     buffer.append(COMMA);
                     buffer.append(POSITIVE);
@@ -95,7 +98,7 @@ public class OutputUtils {
                     buffer.append(results[i].getPosQtyZeroPrice());
                     buffer.append(COMMA);
                     buffer.append(results[i].getPosQtyNegPrice());
-                    buffer.append("\n");
+                    buffer.append(CR);
                     buffer.append(COMMA);
                     buffer.append(ZERO);
                     buffer.append(COMMA);
@@ -104,7 +107,7 @@ public class OutputUtils {
                     buffer.append(results[i].getZeroQtyZeroPrice());
                     buffer.append(COMMA);
                     buffer.append(results[i].getZeroQtyNegPrice());
-                    buffer.append("\n");
+                    buffer.append(CR);
                     buffer.append(COMMA);
                     buffer.append(NEGATIVE);
                     buffer.append(COMMA);
@@ -113,7 +116,19 @@ public class OutputUtils {
                     buffer.append(results[i].getNegQtyZeroPrice());
                     buffer.append(COMMA);
                     buffer.append(results[i].getNegQtyNegPrice());
-                    buffer.append("\n");
+                    buffer.append(CR);
+                    if(results[i].getQtyNotNumber() > 0) {
+                        buffer.append("Quantity NaN");
+                        buffer.append(COMMA);
+                        buffer.append(results[i].getQtyNotNumber());
+                        buffer.append(CR);
+                    }
+                    if(results[i].getPriceNotNumber() > 0) {
+                        buffer.append("Price NaN");
+                        buffer.append(COMMA);
+                        buffer.append(results[i].getPriceNotNumber());
+                        buffer.append(CR);
+                    }
                 }
             }
         }
