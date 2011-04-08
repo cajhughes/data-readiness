@@ -1,5 +1,5 @@
 #summary How to use the Data Readiness tool
-#labels Phase-Deploy
+#labels Phase-Deploy,Featured
 
 = Introduction =
 
