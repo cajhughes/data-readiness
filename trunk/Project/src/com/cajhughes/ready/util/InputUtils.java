@@ -2,7 +2,6 @@ package com.cajhughes.ready.util;
 
 import com.cajhughes.ready.Options;
 import java.io.IOException;
-import java.util.StringTokenizer;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
@@ -21,11 +20,11 @@ public class InputUtils {
         try {
             iterator = FileUtils.lineIterator(options.getFile());
             String header = iterator.nextLine();
-            StringTokenizer tokenizer = new StringTokenizer(header, options.getDelimiter());
-            int tokenCount = tokenizer.countTokens();
-            result = new String[tokenCount];
-            for(int i=0; i<tokenCount; i++) {
-                result[i] = tokenizer.nextToken();
+            String[] tokens = header.split("\\" + options.getDelimiter());
+            int size = tokens.length;
+            result = new String[size];
+            for(int i=0; i<size; i++) {
+                result[i] = tokens[i];
             }
         }
         finally {

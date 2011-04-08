@@ -3,7 +3,6 @@ package com.cajhughes.ready.processor;
 import com.cajhughes.ready.Options;
 import com.cajhughes.ready.QuantityPriceResult;
 import java.io.IOException;
-import java.util.StringTokenizer;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -52,54 +51,52 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], I
     }
 
     private void processHeader(final String line) {
-        int count = 0;
         if(line != null) {
-            StringTokenizer tokenizer = new StringTokenizer(line, options.getDelimiter());
-            while(tokenizer.hasMoreTokens()) {
-                String token = tokenizer.nextToken();
+            String[] tokens = line.split("\\" + options.getDelimiter());
+            int size = tokens.length;
+            for(int i=0; i<size; i++) {
+                String token = tokens[i];
                 if(token.equals(options.getQuantityColumn())) {
-                    quantityIndex = count;
+                    quantityIndex = i;
                 }
                 else if(token.equals(options.getPrice1Column())) {
-                    price1Index = count;
+                    price1Index = i;
                 }
                 else if(token.equals(options.getPrice2Column())) {
-                    price2Index = count;
+                    price2Index = i;
                 }
                 else if(token.equals(options.getPrice3Column())) {
-                    price3Index = count;
+                    price3Index = i;
                 }
-                count++;
             }
         }
     }
 
     private void processLine(final String line) {
-        int count = 0;
         String quantity = null;
         String price1 = null;
         String price2 = null;
         String price3 = null;
         if(line != null) {
-            StringTokenizer tokenizer = new StringTokenizer(line, options.getDelimiter());
-            while(tokenizer.hasMoreTokens()) {
-                String token = tokenizer.nextToken();
-                if(quantityIndex == count) {
+            String[] tokens = line.split("\\" + options.getDelimiter());
+            int size = tokens.length;
+            for(int i=0; i<size; i++) {
+                String token = tokens[i];
+                if(quantityIndex == i) {
                     quantity = token;
                 }
-                else if(price1Index == count) {
+                else if(price1Index == i) {
                     price1 = token;
                 }
-                else if(price2Index == count) {
+                else if(price2Index == i) {
                     price2 = token;
                 }
-                else if(price3Index == count) {
+                else if(price3Index == i) {
                     price3 = token;
                 }
-                if(count >= quantityIndex && count >= price1Index && count >= price2Index && count >= price3Index) {
+                if(i >= quantityIndex && i >= price1Index && i >= price2Index && i >= price3Index) {
                     break;
                 }
-                count++;
             }
             results[0].process(quantity, price1);
             if(price2Index != -1) {

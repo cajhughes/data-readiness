@@ -65,10 +65,10 @@ public class QuantityPriceResult {
     }
 
     public void process(final String quantity, final String price) {
-        int qty;
+        BigDecimal qty;
         BigDecimal money;
         try {
-            qty = getInt(removeQuotes(quantity));
+            qty = getBigDecimal(removeQuotes(quantity));
             try {
                 money = getBigDecimal(removeQuotes(price));
                 setResult(qty, money);
@@ -95,9 +95,10 @@ public class QuantityPriceResult {
         return remove;
     }
 
-    private void setResult(final int quantity, final BigDecimal price) {
+    private void setResult(final BigDecimal quantity, final BigDecimal price) {
+        int quantityCompare = quantity.compareTo(BigDecimal.ZERO);
         int priceCompare = price.compareTo(BigDecimal.ZERO);
-        if(quantity > 0) {
+        if(quantityCompare > 0) {
             if(priceCompare == 1) {
                 positiveQuantityPositivePrice++;                
             }
@@ -108,7 +109,7 @@ public class QuantityPriceResult {
                 positiveQuantityNegativePrice++;
             }
         }
-        else if(quantity == 0) {            
+        else if(quantityCompare == 0) {            
             if(priceCompare == 1) {
                 zeroQuantityPositivePrice++;                
             }
@@ -132,21 +133,10 @@ public class QuantityPriceResult {
         }
     }
 
-    private int getInt(final String quantity) throws NumberFormatException {
-        int value;
-        if(quantity != null) {
-            value = Integer.parseInt(quantity);
-        }
-        else {
-            throw new NumberFormatException();
-        }
-        return value;
-    }
-
-    private BigDecimal getBigDecimal(final String price) throws NumberFormatException {
+    private BigDecimal getBigDecimal(final String decimal) throws NumberFormatException {
         BigDecimal value;
-        if(price != null) {
-            value = new BigDecimal(price);
+        if(decimal != null) {
+            value = new BigDecimal(decimal);
         }
         else {
             throw new NumberFormatException();
