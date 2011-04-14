@@ -13,7 +13,7 @@ The following steps guide you through using the Data Readiness tool to obtain a 
 
 http://dl.dropbox.com/u/7462894/images/start.png
 
-  * Select the file(s) to be assessed by clicking on the Browse... button, and navigating the file dialog to choose your file
+  * Select the file(s) to be assessed by clicking on the Browse... button, and navigating the file dialog to choose your file(s)
   * Once you have selected the file(s), you then need to specify the column delimeter being used (either a comma or a vertical line)
 
 http://dl.dropbox.com/u/7462894/images/select-delimiter.png
