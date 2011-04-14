@@ -24,6 +24,7 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], I
         }
     }
 
+    @Override
     public QuantityPriceResult[] doInBackground() throws IOException {
         File[] files = options.getFiles();
         for(File file: files) {

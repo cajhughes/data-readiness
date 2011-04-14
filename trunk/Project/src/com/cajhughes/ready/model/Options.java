@@ -1,6 +1,5 @@
 package com.cajhughes.ready.model;
 
-import com.cajhughes.ready.util.InputUtils;
 import java.io.File;
 
 public class Options {
@@ -67,12 +66,11 @@ public class Options {
                     validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
                     break;
                 }
-                else {
-                    if(delimiter == null || delimiter.equals("")) {
-                        result = false;
-                        validationError = "Please specify a Delimiter";
-                        break;
-                    }
+            }
+            if(result) {
+                if(delimiter == null || delimiter.equals("")) {
+                    result = false;
+                    validationError = "Please specify a Delimiter";
                 }
             }
         }
@@ -92,24 +90,21 @@ public class Options {
                     validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
                     break;
                 }
+            }
+            if(result) {
+                if(delimiter == null || delimiter.equals("")) {
+                    result = false;
+                    validationError = "Please specify a Delimiter";
+                }
                 else {
-                    if(delimiter == null || delimiter.equals("")) {
+                    if(quantityColumn == null || quantityColumn.equals("")) {
                         result = false;
-                        validationError = "Please specify a Delimiter";
-                        break;
+                        validationError = "Please specify which column contains Quantity data";
                     }
                     else {
-                        if(quantityColumn == null || quantityColumn.equals("")) {
+                        if(price1Column == null || price1Column.equals("")) {
                             result = false;
-                            validationError = "Please specify which column contains Quantity data";
-                            break;
-                        }
-                        else {
-                            if(price1Column == null || price1Column.equals("")) {
-                                result = false;
-                                validationError = "Please specify at least one column which contains Price data";
-                                break;
-                            }
+                            validationError = "Please specify at least one column which contains Price data";
                         }
                     }
                 }
