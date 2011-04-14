@@ -13,6 +13,7 @@ public class StatusQuantityPriceProcessor extends QuantityPriceProcessor {
         this.status = status;
     }
 
+    @Override
     protected void process(List<Integer> lines) {
         Integer last = lines.get(lines.size()-1);
         status.setText("Processed " + last + " lines");

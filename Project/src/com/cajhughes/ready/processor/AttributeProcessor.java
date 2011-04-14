@@ -20,6 +20,7 @@ public class AttributeProcessor extends SwingWorker<Map<Integer, Set<String>>, I
         results = new HashMap<Integer, Set<String>>();
     }
 
+    @Override
     public Map<Integer, Set<String>> doInBackground() throws IOException {
         File[] files = options.getFiles();
         for(File file: files) {
