@@ -1,4 +1,4 @@
-#summary How to use the Data Readiness tool
+#summary How to use the Data Readiness tool for data quality testing
 #labels Featured,Phase-Deploy
 
 = Introduction =
