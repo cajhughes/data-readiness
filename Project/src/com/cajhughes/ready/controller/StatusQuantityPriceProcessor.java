@@ -1,6 +1,7 @@
 package com.cajhughes.ready.controller;
 
 import com.cajhughes.ready.model.Options;
+import com.cajhughes.ready.model.ProcessorProgress;
 import com.cajhughes.ready.processor.QuantityPriceProcessor;
 import java.util.List;
 import javax.swing.JTextField;
@@ -14,8 +15,8 @@ public class StatusQuantityPriceProcessor extends QuantityPriceProcessor {
     }
 
     @Override
-    protected void process(List<Integer> lines) {
-        Integer last = lines.get(lines.size()-1);
-        status.setText("Processed " + last + " lines");
+    protected void process(List<ProcessorProgress> lines) {
+        ProcessorProgress last = lines.get(lines.size()-1);
+        status.setText("Processed " + last.getLinesProcessed() + " lines of " + last.getFile().getAbsolutePath());
     }
 }

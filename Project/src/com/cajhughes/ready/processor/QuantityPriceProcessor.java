@@ -1,6 +1,7 @@
 package com.cajhughes.ready.processor;
 
 import com.cajhughes.ready.model.Options;
+import com.cajhughes.ready.model.ProcessorProgress;
 import com.cajhughes.ready.model.QuantityPriceResult;
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +9,7 @@ import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
-public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], Integer> {
+public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], ProcessorProgress> {
     private Options options = null;
     private QuantityPriceResult[] results = null;
     private int price1Index = -1;
@@ -41,7 +42,7 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], I
                         processLine(line);
                     }
                     if((lineCounter % 1000) == 0) {
-                        publish(lineCounter);
+                        publish(new ProcessorProgress(file, lineCounter));
                     }
                 }
             }
