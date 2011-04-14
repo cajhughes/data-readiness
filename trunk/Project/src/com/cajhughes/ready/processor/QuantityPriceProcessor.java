@@ -2,6 +2,7 @@ package com.cajhughes.ready.processor;
 
 import com.cajhughes.ready.model.Options;
 import com.cajhughes.ready.model.QuantityPriceResult;
+import java.io.File;
 import java.io.IOException;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
@@ -10,14 +11,12 @@ import org.apache.commons.io.LineIterator;
 public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], Integer> {
     private Options options = null;
     private QuantityPriceResult[] results = null;
-    private int lineCounter;
     private int price1Index = -1;
     private int price2Index = -1;
     private int price3Index = -1;
     private int quantityIndex;
 
     public QuantityPriceProcessor(final Options options, final int priceCount) {
-        lineCounter = 0;
         this.options = options;
         results = new QuantityPriceResult[priceCount];
         for(int i=0; i<priceCount; i++) {
@@ -26,24 +25,28 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], I
     }
 
     public QuantityPriceResult[] doInBackground() throws IOException {
-        LineIterator iterator = FileUtils.lineIterator(options.getFile());
-        try {
-            while(!isCancelled() && iterator.hasNext()) {
-                lineCounter++;
-                String line = iterator.nextLine();
-                if(lineCounter == 1) {
-                    processHeader(line);
-                }
-                else {
-                    processLine(line);
-                }
-                if((lineCounter % 1000) == 0) {
-                    publish(lineCounter);
+        File[] files = options.getFiles();
+        for(File file: files) {
+            int lineCounter = 0;
+            LineIterator iterator = FileUtils.lineIterator(file);
+            try {
+                while(!isCancelled() && iterator.hasNext()) {
+                    lineCounter++;
+                    String line = iterator.nextLine();
+                    if(lineCounter == 1) {
+                        processHeader(line);
+                    }
+                    else {
+                        processLine(line);
+                    }
+                    if((lineCounter % 1000) == 0) {
+                        publish(lineCounter);
+                    }
                 }
             }
-        }
-        finally {
-            LineIterator.closeQuietly(iterator);
+            finally {
+                LineIterator.closeQuietly(iterator);
+            }
         }
         QuantityPriceResult[] copy = new QuantityPriceResult[results.length];
         System.arraycopy(results, 0, copy, 0, results.length);

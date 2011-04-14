@@ -1,9 +1,10 @@
 package com.cajhughes.ready.model;
 
+import com.cajhughes.ready.util.InputUtils;
 import java.io.File;
 
 public class Options {
-    private File file = null;
+    private File[] files = null;
     private String delimiter = null;
     private String quantityColumn = null;
     private String price1Column = null;
@@ -11,13 +12,13 @@ public class Options {
     private String price3Column = null;
     private String validationError = null;
 
-    public Options(final File file, final String delimiter) {
-        this(file, delimiter, null, null, null, null);
+    public Options(final File[] files, final String delimiter) {
+        this(files, delimiter, null, null, null, null);
     }
 
-    public Options(final File file, final String delimiter, final String quantity,
+    public Options(final File[] files, final String delimiter, final String quantity,
                    final String price1, final String price2, final String price3) {
-        this.file = file;
+        this.files = files;
         this.delimiter = delimiter;
         this.quantityColumn = quantity;
         this.price1Column = price1;
@@ -29,8 +30,8 @@ public class Options {
         return delimiter;
     }
 
-    public File getFile() {
-        return file;
+    public File[] getFiles() {
+        return files;
     }
 
     public String getPrice1Column() {
@@ -55,18 +56,23 @@ public class Options {
 
     public boolean isAttributeValid() {
         boolean result = true;
-        if(file == null) {
+        if(files == null || files.length == 0) {
             result = false;
-            validationError = "Please specify the file to be processed";
+            validationError = "Please specify one, or more, files to be processed";
         }
         else {
-            if(!file.exists()) {
-                validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
-            }
-            else {
-                if(delimiter == null || delimiter.equals("")) {
+            for(File file: files) {
+                if(!file.exists()) {
                     result = false;
-                    validationError = "Please specify a Delimiter";
+                    validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
+                    break;
+                }
+                else {
+                    if(delimiter == null || delimiter.equals("")) {
+                        result = false;
+                        validationError = "Please specify a Delimiter";
+                        break;
+                    }
                 }
             }
         }
@@ -75,29 +81,35 @@ public class Options {
 
     public boolean isReadyValid() {
         boolean result = true;
-        if(file == null || !file.exists()) {
+        if(files == null || files.length == 0) {
             result = false;
-            validationError = "Please specify the file to be processed";
+            validationError = "Please specify one, or more, files to be processed";
         }
         else {
-            if(!file.exists()) {
-                result = false;
-                validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
-            }
-            else {
-                if(delimiter == null || delimiter.equals("")) {
+            for(File file: files) {
+                if(!file.exists()) {
                     result = false;
-                    validationError = "Please specify a Delimiter";
+                    validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
+                    break;
                 }
                 else {
-                    if(quantityColumn == null || quantityColumn.equals("")) {
+                    if(delimiter == null || delimiter.equals("")) {
                         result = false;
-                        validationError = "Please specify which column contains Quantity data";
+                        validationError = "Please specify a Delimiter";
+                        break;
                     }
                     else {
-                        if(price1Column == null || price1Column.equals("")) {
+                        if(quantityColumn == null || quantityColumn.equals("")) {
                             result = false;
-                            validationError = "Please specify at least one column which contains Price data";
+                            validationError = "Please specify which column contains Quantity data";
+                            break;
+                        }
+                        else {
+                            if(price1Column == null || price1Column.equals("")) {
+                                result = false;
+                                validationError = "Please specify at least one column which contains Price data";
+                                break;
+                            }
                         }
                     }
                 }
