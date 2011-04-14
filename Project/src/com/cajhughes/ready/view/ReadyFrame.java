@@ -116,7 +116,7 @@ public class ReadyFrame extends JFrame {
             }
         });
         status.setBounds(new Rectangle(1, 234, 512, 20));
-        status.setText("Please select the file to be processed");
+        status.setText("Please select the file(s) to be processed");
         status.setEnabled(false);
         filenameLabel.setText("File");
         filenameLabel.setBounds(new Rectangle(10, 23, 70, 14));
@@ -183,20 +183,23 @@ public class ReadyFrame extends JFrame {
             files = fileDialog.getSelectedFiles();
             try {
                 if(!fileHeadersMatch()) {
+                    files = null;
                     JOptionPane.showMessageDialog(
                         this, "Files do not have matching headers", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                else {
+                    filename.setText(null);
+                    for(File file: files) {
+                        filename.setText(filename.getText() + file.getAbsolutePath() + " ");
+                    }
+                    status.setText("Select the column delimiter");
+                    delimiter.setEnabled(true);
+                    delimiter.requestFocus();                    
                 }
             }
             catch(IOException ioe) {
                 JOptionPane.showMessageDialog(this, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
-            filename.setText(null);
-            for(File file: files) {
-                filename.setText(filename.getText() + file.getAbsolutePath() + " ");
-            }
-            status.setText("Select the column delimiter");
-            delimiter.setEnabled(true);
-            delimiter.requestFocus();
         }
     }
 
