@@ -15,10 +15,10 @@ public class OutputUtils {
     public static final String QUOTE = "\"";
     public static final String ZERO = "Zero";
 
-    public static File getOutputFile(final File file) {
+    public static File getOutputFile(final File[] files) {
         File output = null;
-        if(file != null) {
-            StringBuilder buffer = new StringBuilder(file.getAbsolutePath());
+        if(files != null && files.length > 0) {
+            StringBuilder buffer = new StringBuilder(files[0].getAbsolutePath());
             buffer.append(EXTENSION);
             output = new File(buffer.toString());
             while(output.exists()) {

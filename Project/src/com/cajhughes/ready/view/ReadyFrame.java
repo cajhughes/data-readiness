@@ -34,7 +34,7 @@ import org.apache.commons.io.FileUtils;
 
 public class ReadyFrame extends JFrame {
     private static final String[] delimiters = new String[] {"", ",", "|"};
-    private File file;
+    private File[] files;
     private JTextField filename = new JTextField();
     private JButton browse = new JButton();
     private JComboBox delimiter = new JComboBox(delimiters);
@@ -145,6 +145,24 @@ public class ReadyFrame extends JFrame {
         this.getContentPane().add(filename, null);
     }
 
+    private boolean fileHeadersMatch() throws IOException {
+        boolean match = false;
+        String header = null;
+        for(File file: files) {
+            if(header == null) {
+                match = true;
+                header = InputUtils.getHeader(file);
+            }
+            else {
+                match = header.equals(InputUtils.getHeader(file));
+            }
+            if(!match) {
+                break;
+            }
+        }
+        return match;
+    }
+
     private void toggleControls(final boolean on) {
         delimiter.setEnabled(on);
         quantity.setEnabled(on);
@@ -159,10 +177,23 @@ public class ReadyFrame extends JFrame {
 
     private void browse_actionPerformed(ActionEvent e) {
         JFileChooser fileDialog = new JFileChooser();
+        fileDialog.setMultiSelectionEnabled(true);
         int selection = fileDialog.showOpenDialog(this);
         if(selection == JFileChooser.APPROVE_OPTION) {
-            file = fileDialog.getSelectedFile();
-            filename.setText(file.getAbsolutePath());
+            files = fileDialog.getSelectedFiles();
+            try {
+                if(!fileHeadersMatch()) {
+                    JOptionPane.showMessageDialog(
+                        this, "Files do not have matching headers", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            catch(IOException ioe) {
+                JOptionPane.showMessageDialog(this, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            filename.setText(null);
+            for(File file: files) {
+                filename.setText(filename.getText() + file.getAbsolutePath() + " ");
+            }
             status.setText("Select the column delimiter");
             delimiter.setEnabled(true);
             delimiter.requestFocus();
@@ -170,7 +201,7 @@ public class ReadyFrame extends JFrame {
     }
 
     private void start_actionPerformed(ActionEvent e) {
-        options = new Options(file, (String)delimiter.getSelectedItem(),
+        options = new Options(files, (String)delimiter.getSelectedItem(),
                               (String)quantity.getSelectedItem(), (String)price1.getSelectedItem(),
                               (String)price2.getSelectedItem(), (String)price3.getSelectedItem());
         if(options.isReadyValid()) {
@@ -193,7 +224,7 @@ public class ReadyFrame extends JFrame {
     }
 
     private void attributes_actionPerformed(ActionEvent e) {
-        options = new Options(file, (String)delimiter.getSelectedItem());
+        options = new Options(files, (String)delimiter.getSelectedItem());
         if(options.isAttributeValid()) {
             attributeProcessor = new StatusAttributeProcessor(status, options);
             attributeProcessor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -226,7 +257,7 @@ public class ReadyFrame extends JFrame {
         PrintStream stream = null;
         try {
             if(!attributeProcessor.isCancelled()) {
-                File output = OutputUtils.getOutputFile(file);
+                File output = OutputUtils.getOutputFile(files);
                 Map<Integer, Set<String>> results = attributeProcessor.get();
                 stream = new PrintStream(output);
                 OutputUtils.write(stream, InputUtils.getHeaderColumnsOnly(options), results);
@@ -253,7 +284,7 @@ public class ReadyFrame extends JFrame {
     private void writeReadyResults() {
         try {
             if(!readyProcessor.isCancelled()) {
-                File output = OutputUtils.getOutputFile(file);
+                File output = OutputUtils.getOutputFile(files);
                 Object[] prices = {price1.getSelectedItem(), price2.getSelectedItem(), price3.getSelectedItem()};
                 FileUtils.writeStringToFile(
                     output, OutputUtils.toString(quantity.getSelectedItem(), prices, readyProcessor.get()));
@@ -273,7 +304,7 @@ public class ReadyFrame extends JFrame {
     private void delimiter_itemStateChanged(ItemEvent e) {
         String value = (String)delimiter.getSelectedItem();
         if(value != null && !value.equals("")) {
-            Options options = new Options(file, value);
+            Options options = new Options(files, value);
             try {
                 String[] columns = InputUtils.getHeaderColumns(options);
                 if(columns != null && columns.length > 0) {
