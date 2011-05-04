@@ -3,46 +3,53 @@ package com.cajhughes.ready.model;
 import java.io.File;
 
 public class Options {
+    private File file = null;
     private File[] files = null;
     private String delimiter = null;
     private String quantityColumn = null;
-    private String price1Column = null;
-    private String price2Column = null;
-    private String price3Column = null;
+    private String priceColumn = null;
     private String validationError = null;
 
     public Options(final File[] files, final String delimiter) {
-        this(files, delimiter, null, null, null, null);
-    }
-
-    public Options(final File[] files, final String delimiter, final String quantity,
-                   final String price1, final String price2, final String price3) {
         this.files = files;
         this.delimiter = delimiter;
+    }
+
+    public Options(final File file, final String delimiter, final String quantity, final String price) {
+        this.file = file;
+        this.delimiter = delimiter;
         this.quantityColumn = quantity;
-        this.price1Column = price1;
-        this.price2Column = price2;
-        this.price3Column = price3;
+        this.priceColumn = price;
     }
 
     public String getDelimiter() {
         return delimiter;
     }
 
+    public File getFile() {
+        File one = null;
+        if(file != null) {
+            one = file;
+        }
+        else if(files != null) {
+            one = files[0];
+        }
+        return one;
+    }
+
     public File[] getFiles() {
-        return files;
+        File[] more = null;
+        if(files != null) {
+            more = files;
+        }
+        else if(file != null) {
+            more = new File[] {file};
+        }
+        return more;
     }
 
-    public String getPrice1Column() {
-        return price1Column;
-    }
-
-    public String getPrice2Column() {
-        return price2Column;
-    }
-
-    public String getPrice3Column() {
-        return price3Column;
+    public String getPriceColumn() {
+        return priceColumn;
     }
 
     public String getQuantityColumn() {
@@ -79,17 +86,14 @@ public class Options {
 
     public boolean isReadyValid() {
         boolean result = true;
-        if(files == null || files.length == 0) {
+        if(file == null) {
             result = false;
-            validationError = "Please specify one, or more, files to be processed";
+            validationError = "Please specify a file to be processed";
         }
         else {
-            for(File file: files) {
-                if(!file.exists()) {
-                    result = false;
-                    validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
-                    break;
-                }
+            if(!file.exists()) {
+                result = false;
+                validationError = "File, " + file.getAbsolutePath() + ", does not exist - please select another";
             }
             if(result) {
                 if(delimiter == null || delimiter.equals("")) {
@@ -102,9 +106,9 @@ public class Options {
                         validationError = "Please specify which column contains Quantity data";
                     }
                     else {
-                        if(price1Column == null || price1Column.equals("")) {
+                        if(priceColumn == null || priceColumn.equals("")) {
                             result = false;
-                            validationError = "Please specify at least one column which contains Price data";
+                            validationError = "Please specify which contains Price data";
                         }
                     }
                 }

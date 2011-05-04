@@ -6,23 +6,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
-public class AttributeProcessor extends SwingWorker<Map<Integer, Set<String>>, ProcessorProgress> {
+public class AttributeProcessor extends SwingWorker<Map<String, Set<String>>, ProcessorProgress> {
     private Options options = null;
-    private HashMap<Integer, Set<String>> results = null;
+    private Hashtable<Integer, String> numberToName = new Hashtable<Integer, String>();
+    private HashMap<String, Set<String>> results = null;
 
     public AttributeProcessor(final Options options) {
         this.options = options;
-        results = new HashMap<Integer, Set<String>>();
+        results = new HashMap<String, Set<String>>();
     }
 
     @Override
-    public Map<Integer, Set<String>> doInBackground() throws IOException {
+    public Map<String, Set<String>> doInBackground() throws IOException {
         File[] files = options.getFiles();
         for(File file: files) {
             int lineCounter = 0;
@@ -54,7 +56,9 @@ public class AttributeProcessor extends SwingWorker<Map<Integer, Set<String>>, P
             String[] tokens = line.split("\\" + options.getDelimiter());
             int size = tokens.length;
             for(int i=0; i<size; i++) {
-                results.put(i, new HashSet<String>());
+                String token = tokens[i];
+                numberToName.put(i, token);
+                results.put(token, new HashSet<String>());
             }
         }
     }
@@ -64,11 +68,12 @@ public class AttributeProcessor extends SwingWorker<Map<Integer, Set<String>>, P
             String[] tokens = line.split("\\" + options.getDelimiter());
             int size = tokens.length;
             for(int i=0; i<size; i++) {
-                Set<String> set = results.get(i);
+                String name = numberToName.get(i);
+                Set<String> set = results.get(name);
                 if(set != null) {
                     set.add(tokens[i]);
                 }
-                results.put(i, set);
+                results.put(name, set);
             }
         }
     }

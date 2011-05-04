@@ -7,6 +7,39 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
 public class InputUtils {
+    public static boolean fileHeadersMatch(final File[] files) throws IOException {
+        boolean match = false;
+        String header = null;
+        for(File file: files) {
+            if(header == null) {
+                match = true;
+                header = InputUtils.getHeader(file);
+            }
+            else {
+                match = header.equals(InputUtils.getHeader(file));
+            }
+            if(!match) {
+                break;
+            }
+        }
+        return match;
+    }
+
+    public static String getDelimiter(final String header) {
+        String delimiter = null;
+        if(header != null && !header.equals("")) {
+            String[] commaTokens = header.split("\\,");
+            String[] pipeTokens = header.split("\\|");
+            if(commaTokens.length >= pipeTokens.length) {
+                delimiter = ",";
+            }
+            else {
+                delimiter = "|";
+            }
+        }
+        return delimiter;
+    }
+
     public static String getHeader(final File file) throws IOException {
         String result = null;
         LineIterator iterator = null;

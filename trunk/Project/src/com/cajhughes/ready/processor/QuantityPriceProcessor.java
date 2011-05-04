@@ -2,31 +2,32 @@ package com.cajhughes.ready.processor;
 
 import com.cajhughes.ready.model.Options;
 import com.cajhughes.ready.model.ProcessorProgress;
-import com.cajhughes.ready.model.QuantityPriceResult;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.SwingWorker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
-public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], ProcessorProgress> {
+public class QuantityPriceProcessor extends SwingWorker<Map<String, Set<Integer>>, ProcessorProgress> {
+    private static final String QUOTE = "\"";
+
     private Options options = null;
-    private QuantityPriceResult[] results = null;
-    private int price1Index = -1;
-    private int price2Index = -1;
-    private int price3Index = -1;
+    private Map<String, Set<Integer>> results = null;
+    private int priceIndex = -1;
     private int quantityIndex;
 
-    public QuantityPriceProcessor(final Options options, final int priceCount) {
+    public QuantityPriceProcessor(final Options options) {
         this.options = options;
-        results = new QuantityPriceResult[priceCount];
-        for(int i=0; i<priceCount; i++) {
-            results[i] = new QuantityPriceResult();
-        }
+        results = new HashMap<String, Set<Integer>>();
     }
 
     @Override
-    public QuantityPriceResult[] doInBackground() throws IOException {
+    public Map<String, Set<Integer>> doInBackground() throws IOException {
         File[] files = options.getFiles();
         for(File file: files) {
             int lineCounter = 0;
@@ -39,7 +40,7 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], P
                         processHeader(line);
                     }
                     else {
-                        processLine(line);
+                        processLine(line, lineCounter);
                     }
                     if((lineCounter % 1000) == 0) {
                         publish(new ProcessorProgress(file, lineCounter));
@@ -50,9 +51,72 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], P
                 LineIterator.closeQuietly(iterator);
             }
         }
-        QuantityPriceResult[] copy = new QuantityPriceResult[results.length];
-        System.arraycopy(results, 0, copy, 0, results.length);
-        return copy;        
+        return results;        
+    }
+
+    private BigDecimal getBigDecimal(final String decimal) throws NumberFormatException {
+        BigDecimal value;
+        if(decimal != null) {
+            value = new BigDecimal(decimal);
+        }
+        else {
+            throw new NumberFormatException();
+        }
+        return value;
+    }
+
+    private String getCategory(final String quantity, final String price) {
+        BigDecimal qty;
+        BigDecimal money;
+        String category = null;
+        try {
+            qty = getBigDecimal(removeQuotes(quantity));
+            try {
+                money = getBigDecimal(removeQuotes(price));
+                int quantityCompare = qty.compareTo(BigDecimal.ZERO);
+                int priceCompare = money.compareTo(BigDecimal.ZERO);
+                if(quantityCompare > 0) {
+                    if(priceCompare > 0) {
+                        category = "+ve+ve";
+                    }
+                    else if(priceCompare == 0) {
+                        category = "+ve0";
+                    }
+                    else {
+                        category = "+ve-ve";
+                    }
+                }
+                else if(quantityCompare == 0) {
+                    if(priceCompare > 0) {
+                        category = "0+ve";
+                    }
+                    else if(priceCompare == 0) {
+                        category = "00";
+                    }
+                    else {
+                        category = "0-ve";
+                    }
+                }
+                else {
+                    if(priceCompare > 0) {
+                        category = "-ve+ve";
+                    }
+                    else if(priceCompare == 0) {
+                        category = "-ve0";
+                    }
+                    else {
+                        category = "-ve-ve";
+                    }
+                }
+            }
+            catch(NumberFormatException nfe) {
+                category = "PriceNaN";
+            }
+        }
+        catch(NumberFormatException nfe) {
+            category = "QuantityNaN";
+        }
+        return category;
     }
 
     private void processHeader(final String line) {
@@ -64,24 +128,16 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], P
                 if(token.equals(options.getQuantityColumn())) {
                     quantityIndex = i;
                 }
-                else if(token.equals(options.getPrice1Column())) {
-                    price1Index = i;
-                }
-                else if(token.equals(options.getPrice2Column())) {
-                    price2Index = i;
-                }
-                else if(token.equals(options.getPrice3Column())) {
-                    price3Index = i;
+                else if(token.equals(options.getPriceColumn())) {
+                    priceIndex = i;
                 }
             }
         }
     }
 
-    private void processLine(final String line) {
+    private void processLine(final String line, final int lineCount) {
         String quantity = null;
-        String price1 = null;
-        String price2 = null;
-        String price3 = null;
+        String price = null;
         if(line != null) {
             String[] tokens = line.split("\\" + options.getDelimiter());
             int size = tokens.length;
@@ -90,26 +146,33 @@ public class QuantityPriceProcessor extends SwingWorker<QuantityPriceResult[], P
                 if(quantityIndex == i) {
                     quantity = token;
                 }
-                else if(price1Index == i) {
-                    price1 = token;
+                else if(priceIndex == i) {
+                    price = token;
                 }
-                else if(price2Index == i) {
-                    price2 = token;
-                }
-                else if(price3Index == i) {
-                    price3 = token;
-                }
-                if(i >= quantityIndex && i >= price1Index && i >= price2Index && i >= price3Index) {
+                if(i >= quantityIndex && i >= priceIndex) {
                     break;
                 }
             }
-            results[0].process(quantity, price1);
-            if(price2Index != -1) {
-                results[1].process(quantity, price2);
+            String category = getCategory(quantity, price);
+            Set<Integer> set = results.get(category);
+            if(set == null) {
+                set = new HashSet<Integer>();
             }
-            if(price3Index != -1) {
-                results[2].process(quantity, price3);
+            set.add(Integer.valueOf(lineCount));
+            results.put(category, set);
+        }
+    }
+
+    private String removeQuotes(final String value) {
+        String remove = null;
+        if (value != null) {
+            if(value.startsWith(QUOTE) && value.endsWith(QUOTE)) {
+                remove = value.substring(1, value.length()-1);
+            }
+            else {
+                remove = value;
             }
         }
+        return remove;
     }
 }

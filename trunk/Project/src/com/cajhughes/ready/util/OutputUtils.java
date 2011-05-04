@@ -1,10 +1,12 @@
 package com.cajhughes.ready.util;
 
-import com.cajhughes.ready.model.QuantityPriceResult;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 
 public class OutputUtils {
     public static final String COMMA = ",";
@@ -15,10 +17,10 @@ public class OutputUtils {
     public static final String QUOTE = "\"";
     public static final String ZERO = "Zero";
 
-    public static File getOutputFile(final File[] files) {
+    public static File getOutputFile(final File file) {
         File output = null;
-        if(files != null && files.length > 0) {
-            StringBuilder buffer = new StringBuilder(files[0].getAbsolutePath());
+        if(file != null) {
+            StringBuilder buffer = new StringBuilder(file.getAbsolutePath());
             buffer.append(EXTENSION);
             output = new File(buffer.toString());
             while(output.exists()) {
@@ -29,109 +31,69 @@ public class OutputUtils {
         return output;
     }
 
-    public static void write(final PrintStream stream, final Object[] columnNames, final Map<Integer, Set<String>> results) {
+    public static File getOutputFile(final File[] files) {
+        return getOutputFile(files[0]);
+    }
+
+    public static void writeAttributes(final PrintStream stream,
+                                       final String[] columnNames,
+                                       final Map<String, Set<String>> results) {
         StringBuilder buffer = new StringBuilder();
         int columnNameCount = columnNames.length;
-        int mapCount = results.size();
-        Object[] resultsArray = new Object[mapCount];
+        Object[] resultsArray = new Object[columnNameCount];
         int rowCount = 0;
         int maxRowCount = 0;
-        if(columnNameCount == mapCount) {
-            for(int i=0; i<mapCount; i++) {
-                buffer.append((String)columnNames[i]);
-                Object[] columnArray = results.get(i).toArray();
-                int arrayLength = columnArray.length;
-                if(maxRowCount < arrayLength) {
-                    maxRowCount = arrayLength;
+        for(int i=0; i<columnNameCount; i++) {
+            buffer.append(columnNames[i]);
+            Object[] valueArray = results.get(columnNames[i]).toArray();
+            int arrayLength = valueArray.length;
+            if(maxRowCount < arrayLength) {
+                maxRowCount = arrayLength;
+            }
+            resultsArray[i] = valueArray;
+            if(i<columnNameCount-1) {
+                buffer.append(COMMA);
+            }
+        }
+        stream.println(buffer.toString());
+        while(rowCount < maxRowCount) {
+            buffer = new StringBuilder();
+            for(int i=0; i<columnNameCount; i++) {
+                Object[] columnArray = (Object[])resultsArray[i];
+                if(rowCount < columnArray.length) {
+                    buffer.append(QUOTE);
+                    buffer.append(columnArray[rowCount].toString());
+                    buffer.append(QUOTE);
                 }
-                resultsArray[i] = columnArray;
-                if(i<mapCount-1) {
+                if(i<columnNameCount-1) {
                     buffer.append(COMMA);
                 }
             }
             stream.println(buffer.toString());
-            while(rowCount < maxRowCount) {
-                buffer = new StringBuilder();
-                for(int i=0; i<mapCount; i++) {
-                    Object[] columnArray = (Object[])resultsArray[i];
-                    if(rowCount < columnArray.length) {
-                        buffer.append(QUOTE);
-                        buffer.append(columnArray[rowCount].toString());
-                        buffer.append(QUOTE);
-                    }
-                    if(i<mapCount-1) {
-                        buffer.append(COMMA);
-                    }
-                }
-                stream.println(buffer.toString());
-                rowCount++;
-            }
+            rowCount++;
         }
     }
 
-    public static String toString(final Object quantity, final Object[] price, final QuantityPriceResult[] results) {
-        StringBuilder buffer = new StringBuilder();
-        if(results != null) {
-            int count = results.length;
-            for(int i=0; i<count; i++) {
-                if(price[i] != null && !price[i].equals("")) {
-                    buffer.append(COMMA);
-                    buffer.append(COMMA);
-                    buffer.append(price[i].toString().toUpperCase());
-                    buffer.append(COMMA);
-                    buffer.append(COMMA);
-                    buffer.append(CR);
-                    buffer.append(COMMA);
-                    buffer.append(COMMA);
-                    buffer.append(POSITIVE);
-                    buffer.append(COMMA);
-                    buffer.append(ZERO);
-                    buffer.append(COMMA);
-                    buffer.append(NEGATIVE);
-                    buffer.append(CR);
-                    buffer.append(quantity.toString().toUpperCase());
-                    buffer.append(COMMA);
-                    buffer.append(POSITIVE);
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getPosQtyPosPrice());
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getPosQtyZeroPrice());
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getPosQtyNegPrice());
-                    buffer.append(CR);
-                    buffer.append(COMMA);
-                    buffer.append(ZERO);
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getZeroQtyPosPrice());
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getZeroQtyZeroPrice());
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getZeroQtyNegPrice());
-                    buffer.append(CR);
-                    buffer.append(COMMA);
-                    buffer.append(NEGATIVE);
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getNegQtyPosPrice());
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getNegQtyZeroPrice());
-                    buffer.append(COMMA);
-                    buffer.append(results[i].getNegQtyNegPrice());
-                    buffer.append(CR);
-                    if(results[i].getQtyNotNumber() > 0) {
-                        buffer.append("Quantity NaN");
-                        buffer.append(COMMA);
-                        buffer.append(results[i].getQtyNotNumber());
-                        buffer.append(CR);
-                    }
-                    if(results[i].getPriceNotNumber() > 0) {
-                        buffer.append("Price NaN");
-                        buffer.append(COMMA);
-                        buffer.append(results[i].getPriceNotNumber());
-                        buffer.append(CR);
+    public static void writeLines(final PrintStream stream,
+                                  final Map<String, Set<Integer>> results,
+                                  final String category,
+                                  final File incoming) throws IOException {
+        Set<Integer> set = results.get(category);
+        if(set != null && set.size() > 0) {
+            int lineCounter = 0;
+            LineIterator iterator = FileUtils.lineIterator(incoming);
+            try {
+                while(iterator.hasNext()) {
+                    lineCounter++;
+                    String line = iterator.nextLine();
+                    if(lineCounter == 1 || set.contains(Integer.valueOf(lineCounter))) {
+                        stream.println(line);
                     }
                 }
             }
+            finally {
+                LineIterator.closeQuietly(iterator);
+            }
         }
-        return buffer.toString();
     }
 }
