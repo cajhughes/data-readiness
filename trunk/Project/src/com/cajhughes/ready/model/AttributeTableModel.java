@@ -18,22 +18,27 @@ public class AttributeTableModel extends AbstractTableModel {
         }
     }
 
+    @Override
     public int getRowCount() {
         return data.length;
     }
 
+    @Override
     public Class getColumnClass(final int column) {
         return getValueAt(0, column).getClass();
     }
 
+    @Override
     public int getColumnCount() {
         return 2;
     }
 
+    @Override
     public String getColumnName(final int column) {
         return columnNames[column];
     }
 
+    @Override
     public Object getValueAt(int row, int column) {
         if(column == 0) {
             return data[row].getName();
