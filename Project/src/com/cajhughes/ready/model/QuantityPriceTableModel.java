@@ -29,6 +29,7 @@ public class QuantityPriceTableModel extends AbstractTableModel {
         return value;
     }
 
+    @Override
     public Class getColumnClass(final int column) {
         if(column > 0) {
             return Integer.class;
@@ -38,18 +39,22 @@ public class QuantityPriceTableModel extends AbstractTableModel {
         }
     }
 
+    @Override
     public int getColumnCount() {
         return 4;
     }
 
+    @Override
     public String getColumnName(final int column) {
         return columnNames[column];
     }
 
+    @Override
     public int getRowCount() {
         return 5;
     }
 
+    @Override
     public Object getValueAt(int row, int column) {
         Object value = null;
         String matrixValue = categoryMatrix[row][column];
