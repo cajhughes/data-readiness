@@ -82,14 +82,14 @@ public class AttributePanel extends JPanel {
                 }
             });
         start.setText("Start");
-        start.setBounds(new Rectangle(400, 50, 100, 20));
+        start.setBounds(new Rectangle(520, 140, 100, 20));
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 start_actionPerformed();
             }
         });
         stop.setText("Stop");
-        stop.setBounds(new Rectangle(520, 50, 100, 20));
+        stop.setBounds(new Rectangle(520, 170, 100, 20));
         stop.setEnabled(false);
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -97,7 +97,7 @@ public class AttributePanel extends JPanel {
             }
         });
         extract.setText("Extract");
-        extract.setBounds(new Rectangle(520, 100, 100, 20));
+        extract.setBounds(new Rectangle(520, 200, 100, 20));
         extract.setEnabled(false);
         extract.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -109,8 +109,8 @@ public class AttributePanel extends JPanel {
         delimiterLabel.setText("Delimiter");
         delimiterLabel.setBounds(new Rectangle(10, 53, 70, 14));
         scrollLabel.setText("Results");
-        scrollLabel.setBounds(new Rectangle(10, 103, 70, 14));
-        scroll.setBounds(new Rectangle(80, 100, 420, 150));
+        scrollLabel.setBounds(new Rectangle(10, 143, 70, 14));
+        scroll.setBounds(new Rectangle(80, 140, 420, 150));
         table.setFillsViewportHeight(true);
         table.setAutoCreateRowSorter(true);
         this.add(extract, null);
