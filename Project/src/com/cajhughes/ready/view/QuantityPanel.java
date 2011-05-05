@@ -87,19 +87,19 @@ public class QuantityPanel extends JPanel {
                     delimiter_itemStateChanged();
                 }
             });
-        quantity.setBounds(new Rectangle(10, 130, 170, 20));
+        quantity.setBounds(new Rectangle(10, 160, 170, 20));
         quantity.setEnabled(false);
-        price.setBounds(new Rectangle(80, 110, 300, 20));
+        price.setBounds(new Rectangle(80, 100, 300, 20));
         price.setEnabled(false);
         start.setText("Start");
-        start.setBounds(new Rectangle(400, 50, 100, 20));
+        start.setBounds(new Rectangle(520, 140, 100, 20));
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 start_actionPerformed();
             }
         });
         stop.setText("Stop");
-        stop.setBounds(new Rectangle(520, 50, 100, 20));
+        stop.setBounds(new Rectangle(520, 170, 100, 20));
         stop.setEnabled(false);
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -107,7 +107,7 @@ public class QuantityPanel extends JPanel {
             }
         });
         extract.setText("Extract");
-        extract.setBounds(new Rectangle(520, 110, 100, 20));
+        extract.setBounds(new Rectangle(520, 200, 100, 20));
         extract.setEnabled(false);
         extract.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -119,12 +119,12 @@ public class QuantityPanel extends JPanel {
         delimiterLabel.setText("Delimiter");
         delimiterLabel.setBounds(new Rectangle(10, 53, 70, 14));
         quantityLabel.setText("Quantity");
-        quantityLabel.setBounds(new Rectangle(10, 113, 70, 14));
+        quantityLabel.setBounds(new Rectangle(10, 143, 70, 14));
         priceLabel.setText("Price");
-        priceLabel.setBounds(new Rectangle(203, 83, 50, 14));
-        price.setBounds(new Rectangle(270, 80, 170, 20));
+        priceLabel.setBounds(new Rectangle(203, 113, 50, 14));
+        price.setBounds(new Rectangle(270, 110, 170, 20));
         price.setEnabled(false);
-        scroll.setBounds(new Rectangle(200, 110, 300, 110));
+        scroll.setBounds(new Rectangle(200, 140, 300, 110));
         table.setFillsViewportHeight(true);
         table.setCellSelectionEnabled(true);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -187,25 +187,29 @@ public class QuantityPanel extends JPanel {
 
     private void extract_actionPerformed() {
         PrintStream stream = null;
-        String category = model.getCategory(table.getSelectedRow(), table.getSelectedColumn());
-        if(category != null && !category.startsWith("label")) {
-            try {
-                this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                File output = OutputUtils.getOutputFile(file);
-                stream = new PrintStream(output);
-                OutputUtils.writeLines(stream, results, model.getCategory(table.getSelectedRow(), table.getSelectedColumn()), file);
-                stream.flush();
-                stream.close();
-                parent.setStatus("Output written to " + output.getAbsolutePath());
-            }
-            catch(IOException ioe) {
-                this.setCursor(Cursor.getDefaultCursor());
-                JOptionPane.showMessageDialog(this, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);            
-            }
-            finally {
-                this.setCursor(Cursor.getDefaultCursor());
-                if(stream != null) {
+        int selectedColumn = table.getSelectedColumn();
+        int selectedRow = table.getSelectedRow();
+        if(selectedColumn > 0 && selectedRow >= 0) {
+            String category = model.getCategory(selectedRow, selectedColumn);
+            if(category != null && !category.startsWith("label")) {
+                try {
+                    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    File output = OutputUtils.getOutputFile(file, category);
+                    stream = new PrintStream(output);
+                    OutputUtils.writeLines(stream, results, model.getCategory(table.getSelectedRow(), table.getSelectedColumn()), file);
+                    stream.flush();
                     stream.close();
+                    parent.setStatus("Output written to " + output.getAbsolutePath());
+                }
+                catch(IOException ioe) {
+                    this.setCursor(Cursor.getDefaultCursor());
+                    JOptionPane.showMessageDialog(this, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);            
+                }
+                finally {
+                    this.setCursor(Cursor.getDefaultCursor());
+                    if(stream != null) {
+                        stream.close();
+                    }
                 }
             }
         }

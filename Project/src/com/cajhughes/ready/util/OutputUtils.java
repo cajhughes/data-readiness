@@ -18,9 +18,17 @@ public class OutputUtils {
     public static final String ZERO = "Zero";
 
     public static File getOutputFile(final File file) {
+        return getOutputFile(file, null);
+    }
+
+    public static File getOutputFile(final File file, final String category) {
         File output = null;
         if(file != null) {
             StringBuilder buffer = new StringBuilder(file.getAbsolutePath());
+            if(category != null) {
+                buffer.append(".");
+                buffer.append(category);
+            }
             buffer.append(EXTENSION);
             output = new File(buffer.toString());
             while(output.exists()) {
