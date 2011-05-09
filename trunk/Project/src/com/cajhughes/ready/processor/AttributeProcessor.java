@@ -1,57 +1,21 @@
 package com.cajhughes.ready.processor;
 
 import com.cajhughes.ready.model.Options;
-import com.cajhughes.ready.model.ProcessorProgress;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.Set;
-import javax.swing.SwingWorker;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
 
-public class AttributeProcessor extends SwingWorker<Map<String, Set<String>>, ProcessorProgress> {
-    private Options options = null;
+public class AttributeProcessor extends AbstractProcessor<String> {
     private Hashtable<Integer, String> numberToName = new Hashtable<Integer, String>();
-    private HashMap<String, Set<String>> results = null;
 
     public AttributeProcessor(final Options options) {
-        this.options = options;
+        super(options);
         results = new HashMap<String, Set<String>>();
     }
 
     @Override
-    public Map<String, Set<String>> doInBackground() throws IOException {
-        File[] files = options.getFiles();
-        for(File file: files) {
-            int lineCounter = 0;
-            LineIterator iterator = FileUtils.lineIterator(file);
-            try {
-                while(!isCancelled() && iterator.hasNext()) {
-                    lineCounter++;
-                    String line = iterator.nextLine();
-                    if(lineCounter == 1) {
-                        processHeader(line);
-                    }
-                    else {
-                        processLine(line);
-                    }
-                    if((lineCounter % 1000) == 0) {
-                        publish(new ProcessorProgress(file, lineCounter));
-                    }
-                }
-            }
-            finally {
-                LineIterator.closeQuietly(iterator);
-            }
-        }
-        return results;
-    }
-
-    private void processHeader(final String line) {
+    protected void processHeader(final String line) {
         if(line != null) {
             String[] tokens = line.split("\\" + options.getDelimiter());
             int size = tokens.length;
@@ -63,7 +27,8 @@ public class AttributeProcessor extends SwingWorker<Map<String, Set<String>>, Pr
         }
     }
 
-    private void processLine(final String line) {
+    @Override
+    protected void processLine(final String line, final int lineNumber) {
         if(line != null) {
             String[] tokens = line.split("\\" + options.getDelimiter());
             int size = tokens.length;

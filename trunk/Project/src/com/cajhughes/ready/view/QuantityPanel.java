@@ -203,7 +203,7 @@ public class QuantityPanel extends JPanel {
                 }
                 catch(IOException ioe) {
                     this.setCursor(Cursor.getDefaultCursor());
-                    JOptionPane.showMessageDialog(this, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);            
+                    JOptionPane.showMessageDialog(this, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 finally {
                     this.setCursor(Cursor.getDefaultCursor());

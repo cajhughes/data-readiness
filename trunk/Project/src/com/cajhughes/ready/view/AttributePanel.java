@@ -145,7 +145,7 @@ public class AttributePanel extends JPanel {
                     parent.setStatus("Select the column delimiter");
                     delimiter.setEnabled(true);
                     delimiter.setSelectedItem(InputUtils.getDelimiter(InputUtils.getHeader(files[0])));
-                    delimiter.requestFocus();                    
+                    delimiter.requestFocus();
                 }
             }
             catch(IOException ioe) {
@@ -178,7 +178,7 @@ public class AttributePanel extends JPanel {
             parent.setStatus("Output written to " + output.getAbsolutePath());
         }
         catch(Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);            
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         finally {
             if(stream != null) {

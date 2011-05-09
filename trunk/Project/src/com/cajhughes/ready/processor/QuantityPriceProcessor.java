@@ -1,57 +1,19 @@
 package com.cajhughes.ready.processor;
 
 import com.cajhughes.ready.model.Options;
-import com.cajhughes.ready.model.ProcessorProgress;
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import javax.swing.SwingWorker;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
 
-public class QuantityPriceProcessor extends SwingWorker<Map<String, Set<Integer>>, ProcessorProgress> {
+public class QuantityPriceProcessor extends AbstractProcessor<Integer> {
     private static final String QUOTE = "\"";
-
-    private Options options = null;
-    private Map<String, Set<Integer>> results = null;
     private int priceIndex = -1;
     private int quantityIndex;
 
     public QuantityPriceProcessor(final Options options) {
-        this.options = options;
+        super(options);
         results = new HashMap<String, Set<Integer>>();
-    }
-
-    @Override
-    public Map<String, Set<Integer>> doInBackground() throws IOException {
-        File[] files = options.getFiles();
-        for(File file: files) {
-            int lineCounter = 0;
-            LineIterator iterator = FileUtils.lineIterator(file);
-            try {
-                while(!isCancelled() && iterator.hasNext()) {
-                    lineCounter++;
-                    String line = iterator.nextLine();
-                    if(lineCounter == 1) {
-                        processHeader(line);
-                    }
-                    else {
-                        processLine(line, lineCounter);
-                    }
-                    if((lineCounter % 1000) == 0) {
-                        publish(new ProcessorProgress(file, lineCounter));
-                    }
-                }
-            }
-            finally {
-                LineIterator.closeQuietly(iterator);
-            }
-        }
-        return results;        
     }
 
     private BigDecimal getBigDecimal(final String decimal) throws NumberFormatException {
@@ -119,7 +81,8 @@ public class QuantityPriceProcessor extends SwingWorker<Map<String, Set<Integer>
         return category;
     }
 
-    private void processHeader(final String line) {
+    @Override
+    protected void processHeader(final String line) {
         if(line != null) {
             String[] tokens = line.split("\\" + options.getDelimiter());
             int size = tokens.length;
@@ -135,7 +98,8 @@ public class QuantityPriceProcessor extends SwingWorker<Map<String, Set<Integer>
         }
     }
 
-    private void processLine(final String line, final int lineCount) {
+    @Override
+    protected void processLine(final String line, final int lineCount) {
         String quantity = null;
         String price = null;
         if(line != null) {
