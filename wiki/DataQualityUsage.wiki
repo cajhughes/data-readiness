@@ -14,7 +14,7 @@ The following steps guide you through using the Data Readiness tool to obtain a 
 http://dl.dropbox.com/u/7462894/images/start.png
 
   * Select the file to be assessed by clicking on the Browse... button, and navigating the file dialog to choose your file
-  * Once you have selected the file, you then need to specify the column delimeter being used (the application will default a value based on an analysis of the header line, but you can override this if necessary)
+  * Once you have selected the file, you then need to specify the column delimiter being used (the application will default a value based on an analysis of the header line, but you can override this if necessary)
 
 http://dl.dropbox.com/u/7462894/images/select-delimiter.png
 
